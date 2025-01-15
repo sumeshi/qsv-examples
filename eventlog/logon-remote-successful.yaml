@@ -1,0 +1,57 @@
+title: 'logon-remote-successful'
+description: 'Successful remote logons (LogonType 3, 10, 12).'
+version: '1.0.0'
+author: 'sumeshi'
+
+# LogonType 3 (network)
+# LogonType 10 (remote interactive)
+# LogonType 12 (cached remote interactive)
+
+rules:
+  load: 
+  isin:
+    colname: 'EventId'
+    values:
+      - 4624
+  select:
+    colnames:
+      - 'TimeCreated'
+      - 'PayloadData2'
+      - 'Computer'
+      - 'RemoteHost'
+      - 'UserName'
+      - 'PayloadData1'
+      - 'PayloadData3'
+  contains:
+    colname: 'PayloadData2'
+    pattern: 'LogonType (3|10|12)'
+  sort:
+    colnames:
+      - 'TimeCreated'
+  changetz:
+    colname: 'TimeCreated'
+    timezone_from: 'UTC'
+    timezone_to: 'UTC'
+    datetime_format: "%Y-%m-%d %H:%M:%S%.f"
+  sed:
+    colname: 'PayloadData2'
+    pattern: '^LogonType '
+    replacement: ''
+  renamecol:
+    colname: 'PayloadData2'
+    new_colname: 'LogonType'
+  sed:
+    colname: 'PayloadData1'
+    pattern: '^Target: '
+    replacement: ''
+  renamecol:
+    colname: 'PayloadData1'
+    new_colname: 'Target'
+  sed:
+    colname: 'PayloadData3'
+    pattern: '^LogonId: '
+    replacement: ''
+  renamecol:
+    colname: 'PayloadData3'
+    new_colname: 'LogonId'
+  dump: 
